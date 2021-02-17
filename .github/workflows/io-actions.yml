@@ -46,7 +46,7 @@ jobs:
     
     - name: Synopsys Intelligent Security Scan
       id: prescription
-      uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
+      uses: synopsys-sig/intelligent-security-scan@9ce02cb14c3a1588fe9ca9c18f4d2cc72c842a95
       with:
         additionalWorkflowArgs: --persona=developer --release.type=minor --github.token=${{secrets.GITHUB_TOKEN}}
                   --sast.rescan.threshold=0 --sca.rescan.threshold=0 
@@ -85,7 +85,7 @@ jobs:
     
     - name: Synopsys Intelligent Security Scan
       if: ${{ steps.prescription.outputs.sastScan == 'true' || steps.prescription.outputs.scaScan == 'true' }}
-      uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
+      uses: synopsys-sig/intelligent-security-scan@9ce02cb14c3a1588fe9ca9c18f4d2cc72c842a95
       with:
         additionalWorkflowArgs: --slack.channel.id=C015LGE7RRQ --slack.token=${{secrets.ORG_SLACK_TOKEN}} 
                 --IS_SAST_ENABLED=${{steps.prescription.outputs.sastScan}} --IS_SCA_ENABLED=${{steps.prescription.outputs.scaScan}} --github.token=${{secrets.GITHUB_TOKEN}}
