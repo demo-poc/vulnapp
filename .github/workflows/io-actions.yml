@@ -43,8 +43,6 @@ jobs:
         sleep 45
         curl http://localhost:9090/actuator/health
         curl http://localhost:9091/actuator/health
-        ls -al
-        rm io-manifest.yml
     
     - name: Synopsys Intelligent Security Scan
       id: prescription
