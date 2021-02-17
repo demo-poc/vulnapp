@@ -14,7 +14,6 @@ jobs:
       CHECKERS: --all --webapp-security 
     steps:
     - name: Static Analysis with Coverity
-      if: ${{steps.prescription.outputs.sastScan == 'true' }}
       continue-on-error: true
       run: |
          docker container stop io-iq
