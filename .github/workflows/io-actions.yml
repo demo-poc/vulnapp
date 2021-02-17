@@ -27,6 +27,10 @@ jobs:
     
     - name: Start IO Servers
       run: |
+        docker container stop io-iq
+        docker container stop io-workflowengine
+        docker container rm io-iq
+        docker container rm io-workflowengine
         docker login --username rahulguna10 --password ${{secrets.DOCKER_TOKEN}}
         docker pull rahulguna10/io-iq:2021-01
         docker pull rahulguna10/io-workflowengine:2021-01
@@ -58,6 +62,35 @@ jobs:
          rm -rf temp
          $COV_BIN/cov-build --dir temp $BLDCMD
          $COV_BIN/cov-analyze --dir temp --ticker-mode none --strip-path $PWD $CHECKERS
+    
+    - name: Software Composition Analysis with Black Duck
+      if: ${{steps.prescription.outputs.scaScan == 'true' }}
+      uses: blackducksoftware/github-action@v2
+      with:
+         args: '--blackduck.url="${{ secrets.BLACKDUCK_URL}}" --blackduck.api.token="${{ secrets.BLACKDUCK_TOKEN}}" --detect.tools="SIGNATURE_SCAN,DETECTOR"'
+    
+    - name: Synopsys Intelligent Security Scan
+      if: ${{ steps.prescription.outputs.sastScan == 'true' || steps.prescription.outputs.scaScan == 'true' }}
+      uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
+      with:
+        additionalWorkflowArgs: --slack.channel.id=C015LGE7RRQ --slack.token=${{secrets.ORG_SLACK_TOKEN}} 
+                --IS_SAST_ENABLED=false --IS_SCA_ENABLED=${{steps.prescription.outputs.scaScan}} --github.token=${{secrets.GITHUB_TOKEN}}
+                --blackduck.project.name=vulnado:1.0 --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
+        stage: "WORKFLOW"
+    
+    - name: Upload SARIF Report
+      if: ${{steps.prescription.outputs.sastScan == 'true' }}
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        # Path to SARIF file relative to the root of the repository
+        sarif_file: workflowengine-results.sarif.json
+    
+    - name: Stop IO Servers
+      run: |
+        docker container stop io-iq
+        docker container stop io-workflowengine
+        docker container rm io-iq
+        docker container rm io-workflowengine
 
   io-action:
     name: IO Action
