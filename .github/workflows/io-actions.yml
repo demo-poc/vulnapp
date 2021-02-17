@@ -5,13 +5,31 @@ on:
     branches: [ master ]
 
 jobs:
-  analyze:
-    name: Analyze
+  coverity:
+    name: Coverity
     runs-on: [self-hosted,Linux, X64]
     env:
       COV_BIN: /opt/covanalysis/bin
       BLDCMD: mvn -B -DskipTests clean package --file pom.xml
       CHECKERS: --all --webapp-security 
+    steps:
+    - name: Static Analysis with Coverity
+      if: ${{steps.prescription.outputs.sastScan == 'true' }}
+      continue-on-error: true
+      run: |
+         docker container stop io-iq
+         docker container stop io-workflowengine
+         docker container rm io-iq
+         docker container rm io-workflowengine
+         export "PATH=$COV_BIN:$PATH"
+         $COV_BIN/cov-configure --java
+         rm -rf temp
+         $COV_BIN/cov-build --dir temp $BLDCMD
+         $COV_BIN/cov-analyze --dir temp --ticker-mode none --strip-path $PWD $CHECKERS
+
+  io-action:
+    name: IO Action
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
@@ -28,10 +46,6 @@ jobs:
     
     - name: Start IO Servers
       run: |
-        docker container stop io-iq
-        docker container stop io-workflowengine
-        docker container rm io-iq
-        docker container rm io-workflowengine
         docker login --username rahulguna10 --password ${{secrets.DOCKER_TOKEN}}
         docker pull rahulguna10/io-iq:2021-01
         docker pull rahulguna10/io-workflowengine:2021-01
@@ -53,16 +67,6 @@ jobs:
                   --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
                   --sensitive.package.pattern='.*(\\+\\+\\+.*(com\\/example\\/app)).*'
         stage: "IO"
-    
-    - name: Static Analysis with Coverity
-      if: ${{steps.prescription.outputs.sastScan == 'true' }}
-      continue-on-error: true
-      run: |
-         export "PATH=$COV_BIN:$PATH"
-         $COV_BIN/cov-configure --java
-         rm -rf temp
-         $COV_BIN/cov-build --dir temp $BLDCMD
-         $COV_BIN/cov-analyze --dir temp --ticker-mode none --strip-path $PWD $CHECKERS
     
     # Please note that the ID in previous step was set to prescription
     # in order for this logic to work also make sure that POLARIS_ACCESS_TOKEN
