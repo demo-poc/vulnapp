@@ -13,7 +13,44 @@ jobs:
       BLDCMD: mvn -B -DskipTests clean package --file pom.xml
       CHECKERS: --all --webapp-security 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        # We must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head.
+        fetch-depth: 2
+
+    # If this run was triggered by a pull request event, then checkout
+    # the head of the pull request instead of the merge commit.
+    - run: git checkout HEAD^2
+      if: ${{ github.event_name == 'pull_request' }}
+    
+    - name: Start IO Servers
+      run: |
+        docker login --username rahulguna10 --password ${{secrets.DOCKER_TOKEN}}
+        docker pull rahulguna10/io-iq:2021-01
+        docker pull rahulguna10/io-workflowengine:2021-01
+        docker run --name io-iq -p 9090:9090 -e spring.datasource.url=${{secrets.POSTGRES_SERVER}} -e io.datasource.type=sql rahulguna10/io-iq:2021-01 &
+        docker run --name io-workflowengine -p 9091:9091 rahulguna10/io-workflowengine:2021-01 &
+    
+    - name: Check IO Server Status
+      run: | 
+        sleep 45
+        curl http://localhost:9090/actuator/health
+        curl http://localhost:9091/actuator/health
+    
+    - name: Synopsys Intelligent Security Scan
+      id: prescription
+      uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
+      with:
+        additionalWorkflowArgs: --persona=developer --release.type=minor --github.token=${{secrets.GITHUB_TOKEN}}
+                  --sast.rescan.threshold=0 --sca.rescan.threshold=0 
+                  --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
+                  --sensitive.package.pattern='.*(\\+\\+\\+.*(com\\/example\\/app)).*'
+        stage: "IO"
+    
     - name: Static Analysis with Coverity
+      if: ${{steps.prescription.outputs.sastScan == 'true' }}
       continue-on-error: true
       run: |
          export "PATH=$COV_BIN:$PATH"
