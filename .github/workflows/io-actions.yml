@@ -47,6 +47,7 @@ jobs:
                   --sast.rescan.threshold=0 --sca.rescan.threshold=0 
                   --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
                   --sensitive.package.pattern='.*(\\+\\+\\+.*(com\\/example\\/app)).*'
+                  --io.manifest.url=https://sigdevsecops.blob.core.windows.net/intelligence-orchestration/coverity/2021.01/io-manifest.yml
         stage: "IO"
     
     - name: Static Analysis with Coverity
@@ -75,6 +76,7 @@ jobs:
         additionalWorkflowArgs: --slack.channel.id=C015LGE7RRQ --slack.token=${{secrets.ORG_SLACK_TOKEN}} 
                 --IS_SAST_ENABLED=false --IS_SCA_ENABLED=${{steps.prescription.outputs.scaScan}} --github.token=${{secrets.GITHUB_TOKEN}}
                 --blackduck.project.name=vulnado:1.0 --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
+                --io.manifest.url=https://sigdevsecops.blob.core.windows.net/intelligence-orchestration/coverity/2021.01/io-manifest.yml
         stage: "WORKFLOW"
     
     - name: Upload SARIF Report
