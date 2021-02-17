@@ -27,10 +27,6 @@ jobs:
     
     - name: Start IO Servers
       run: |
-        docker container stop io-iq
-        docker container stop io-workflowengine
-        docker container rm io-iq
-        docker container rm io-workflowengine
         docker login --username rahulguna10 --password ${{secrets.DOCKER_TOKEN}}
         docker pull rahulguna10/io-iq:2021-01
         docker pull rahulguna10/io-workflowengine:2021-01
