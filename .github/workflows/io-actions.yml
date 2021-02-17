@@ -28,6 +28,10 @@ jobs:
     
     - name: Start IO Servers
       run: |
+        docker container stop io-iq
+        docker container stop io-workflowengine
+        docker container rm io-iq
+        docker container rm io-workflowengine
         docker login --username rahulguna10 --password ${{secrets.DOCKER_TOKEN}}
         docker pull rahulguna10/io-iq:2021-01
         docker pull rahulguna10/io-workflowengine:2021-01
@@ -45,7 +49,7 @@ jobs:
       uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
       with:
         additionalWorkflowArgs: --persona=developer --release.type=minor --github.token=${{secrets.GITHUB_TOKEN}}
-                  --sast.rescan.threshold=0  --sca.rescan.threshold=0 
+                  --sast.rescan.threshold=0 --sca.rescan.threshold=0 
                   --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
                   --sensitive.package.pattern='.*(\\+\\+\\+.*(com\\/example\\/app)).*'
         stage: "IO"
