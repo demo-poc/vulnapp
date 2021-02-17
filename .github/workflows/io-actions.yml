@@ -62,6 +62,9 @@ jobs:
          rm -rf temp
          $COV_BIN/cov-build --dir temp $BLDCMD
          $COV_BIN/cov-analyze --dir temp --ticker-mode none --strip-path $PWD $CHECKERS
+         $COV_BIN/cov-format-errors --dir idir --json-output-v7 coverity-results.json
+         ls -al
+         cat coverity-results.json
     
     - name: Software Composition Analysis with Black Duck
       if: ${{steps.prescription.outputs.scaScan == 'true' }}
