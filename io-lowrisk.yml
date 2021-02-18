@@ -3,7 +3,7 @@ application:
   projectLanguage: Java  
   platformVersion: Java 8  
   buildSystem: Maven  
-  appName: vulnapp
+  appName: Vulnapp
   appVersion: 1.0.0 
 environment:
   jiraProjectName: DEMO
