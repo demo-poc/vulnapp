@@ -19,7 +19,6 @@ public class LoginController {
   LoginResponse login(@RequestBody LoginRequest input) {
     User user = User.fetch(input.username);
     System.out.println(input.username);
-    System.out.println(input.username);
     System.out.println(input.password);
     System.out.println(user.hashedPassword);
     if (Postgres.md5(input.password).equals(user.hashedPassword)) {
