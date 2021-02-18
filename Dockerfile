@@ -1,8 +1,6 @@
-FROM openjdk:8
+FROM tomcat:latest
 
-RUN apt-get update && \
-    apt-get install build-essential maven default-jdk cowsay netcat -y && \
-    update-alternatives --config javac
-COPY . .
+COPY *.war /usr/local/tomcat/webapps/
 
-CMD ["mvn", "spring-boot:run"]
+EXPOSE 8080
+CMD ["catalina.sh", "run"]

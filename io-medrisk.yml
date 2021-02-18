@@ -1,4 +1,4 @@
-template: high-risk
+template: medium-risk
 application:
   projectLanguage: Java  
   platformVersion: Java 8  
