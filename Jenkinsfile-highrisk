@@ -1,3 +1,3 @@
-@Library('Stargazer-Lib')
+@Library('io-shared-library')
 import com.demo.*
 new pipeline.EntryPoint().execute('io-highrisk.yml')
