@@ -45,7 +45,7 @@ jobs:
       uses: synopsys-sig/intelligent-security-scan@398f5a2fcc27ca9a1b192129c5254a44b0d11a7c
       with:
         additionalWorkflowArgs: --persona=developer --release.type=minor --github.token=${{secrets.GITHUB_TOKEN}}
-                  --sast.rescan.threshold=0 --sca.rescan.threshold=0 
+                  --sast.rescan.threshold=10 --sca.rescan.threshold=10 
                   --blackduck.url=${{secrets.BLACKDUCK_URL}} --blackduck.api.token=${{secrets.BLACKDUCK_TOKEN}}
                   --sensitive.package.pattern='.*(\\+\\+\\+.*(com\\/example\\/app)).*'
                   --io.manifest.url=https://sigdevsecops.blob.core.windows.net/intelligence-orchestration/coverity/2021.01/io-manifest.yml
