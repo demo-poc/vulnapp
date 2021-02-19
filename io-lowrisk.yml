@@ -6,7 +6,7 @@ application:
   appName: Vulnapp
   appVersion: 1.0.0 
 environment:
-  jiraProjectName: DEMO
+  jiraProjectName: VUL
   testDeploymentRoot: vulnapp  
 security:
   pipeline:
