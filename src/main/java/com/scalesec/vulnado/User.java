@@ -40,13 +40,14 @@ public class User {
   public static User fetch(String un) {
     Statement stmt = null;
     User user = null;
-    String password = "test1234";
+    
     try {
       Connection cxn = Postgres.connection();
       stmt = cxn.createStatement();
       System.out.println("Opened database successfully");
 
       String query = "select * from users where username = '" + un + "' limit 1";
+      String pwd = "";
       System.out.println(query);
       ResultSet rs = stmt.executeQuery(query);
       if (rs.next()) {
