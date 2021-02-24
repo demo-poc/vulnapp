@@ -40,6 +40,7 @@ public class User {
   public static User fetch(String un) {
     Statement stmt = null;
     User user = null;
+    String password = "test1234";
     try {
       Connection cxn = Postgres.connection();
       stmt = cxn.createStatement();
