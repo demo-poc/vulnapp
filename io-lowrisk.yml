@@ -3,10 +3,10 @@ application:
   projectLanguage: Java  
   platformVersion: Java 8  
   buildSystem: Maven  
-  appName: Vulnapp
+  appName: CustomApplication
   appVersion: 1.0.0 
 environment:
-  jiraProjectName: VUL
+  jiraProjectName: BOD
   testDeploymentRoot: vulnapp  
 security:
   pipeline:
