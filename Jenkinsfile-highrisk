@@ -1,3 +1,0 @@
-@Library('io-library@dockerized')
-import com.synopsys.sigio.*
-new pipeline.EntryPoint().execute()
