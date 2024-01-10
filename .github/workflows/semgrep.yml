@@ -21,4 +21,10 @@ jobs:
       image: returntocorp/semgrep
     steps:
     - uses: actions/checkout@v3
-    - run: semgrep ci --sarif
+    - run: semgrep ci --sarif -o semgrep.sarif
+    - name: report
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: semgrep.sarif
+        category: semgrep
+          
