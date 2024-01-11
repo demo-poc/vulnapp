@@ -19,10 +19,11 @@ public class LoginController {
   LoginResponse login(@RequestBody LoginRequest input) {
     User user = User.fetch(input.username);
     System.out.println(input.username);
-    //print password like "p@ssw0rd!!"
+    //test data password="p@ssw0rd!!"
     System.out.println(input.password);
     System.out.println(user.hashedPassword);
     if (Postgres.md5(input.password).equals(user.hashedPassword)) {
+      System.out.println(user.hashedPassword);
       return new LoginResponse(user.token(secret));
     } else {
       throw new Unauthorized("Access Denied");
