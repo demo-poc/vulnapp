@@ -23,6 +23,7 @@ public class LoginController {
     System.out.println(user.hashedPassword);
     String hashedPass = Postgres.md5(input.password);
     if (Postgres.md5(input.password).equals(user.hashedPassword)) {
+      System.out.println(user.hashedPassword);
       return new LoginResponse(user.token(secret));
     } else {
       throw new Unauthorized("Access Denied");
