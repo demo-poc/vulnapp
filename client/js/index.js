@@ -53,6 +53,7 @@ $(document).ready(function(){
 
   $('#signout').click(function(){
     alert("Goodbye!");
+    alert(localStorage.username);
     localStorage.jwt = '';
     localStorage.username = '';
     window.location.replace("login.html")
