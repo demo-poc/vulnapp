@@ -68,3 +68,34 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
+
+      - name: Check for critical code scanning alerts
+        id: check_critical
+        run: |
+          owner="${{ github.repository_owner }}"
+          repo="${{ github.event.repository.name }}"
+          alerts=$(gh api "/repos/$owner/$repo/code-scanning/alerts" --paginate --jq '.[] | select(.rule.severity=="critical")')
+          if [[ -n "$alerts" ]]; then
+            echo "Critical alerts found"
+            echo "critical_found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No critical alerts"
+            echo "critical_found=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+  attest:
+    name: Build Provenance Attestation
+    needs: snyk_scan
+    if: needs.scan.outputs.critical_found == 'false'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+          
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        id: attest
+        with:
+          subject-path: 'target'
