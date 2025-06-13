@@ -57,6 +57,6 @@ jobs:
           path: ${{ steps.locate-artifact.outputs.artifact_path }}
 
       - name: Generate SLSA Provenance
-        uses: slsa-framework/slsa-github-generator/actions/provenance@v1
+        uses: slsa-framework/slsa-github-generator/actions/provenance@v2.1.0
         with:
           artifact_path: ${{ steps.locate-artifact.outputs.artifact_path }}
