@@ -1,10 +1,10 @@
-name: Snyk Maven Scan
+name: Code Scan
 
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [develop]
 
 permissions:
   contents: read
@@ -15,87 +15,54 @@ jobs:
   snyk_scan:
     name: Snyk Scan
     runs-on: ubuntu-latest
+    
+    outputs:
+      critical_found: ${{ steps.check.outputs.critical_found }}
 
     steps:
-      - uses: snyk/actions/setup@master
-      
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
-          
-      - name: Verify Java setup
+
+      - name: Install Snyk CLI
         run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          java -version
-          echo "Java binary: $(which java)"
-          
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          curl -sL https://snyk.io/install | bash
+          echo "$HOME/.snyk" >> $GITHUB_PATH
 
-      - name: Build with Maven (optional)
-        run: mvn -B package
+      - name: Auth with Snyk
+        run: snyk auth "${{ secrets.SNYK_TOKEN }}"
 
-      - name: Run Snyk Open Source scan 
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --org="${{ secrets.SNYK_ORG }}"
+      - name: Run Snyk Code scan
         continue-on-error: true
-  
-      - name: Run Snyk Code (static analysis)
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: code test
-          args: --org="${{ secrets.SNYK_ORG }}" --sarif-file-output=snyk.sarif
-        continue-on-error: true
-     # - name: Monitor project for continuous integration
-      #  run: snyk monitor --all-projects --org="${{ secrets.SNYK_ORG }}"
+        run: snyk code test --org="${{ secrets.SNYK_ORG }}" --sarif-file-output=snyk-results.sarif
 
-      - name: Upload SARIF report to GitHub Security tab
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: snyk.sarif
+          sarif_file: snyk-results.sarif
 
-      - name: Check for critical code scanning alerts
-        id: check_critical
+      - name: Check for critical findings
+        id: check
         run: |
-          owner="${{ github.repository_owner }}"
-          repo="${{ github.event.repository.name }}"
-          alerts=$(gh api "/repos/$owner/$repo/code-scanning/alerts" --paginate --jq '.[] | select(.rule.severity=="critical")')
+          alerts=$(gh api "/repos/${{ github.repository }}/code-scanning/alerts" --paginate --jq '.[] | select(.rule.severity=="critical")')
           if [[ -n "$alerts" ]]; then
-            echo "Critical alerts found"
             echo "critical_found=true" >> "$GITHUB_OUTPUT"
           else
-            echo "No critical alerts"
             echo "critical_found=false" >> "$GITHUB_OUTPUT"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
-  attest:
-    name: Build Provenance Attestation
-    needs: snyk_scan
-    if: needs.scan.outputs.critical_found == 'false'
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-          
-      - name: Attest
-        uses: actions/attest-build-provenance@v2
-        id: attest
+      - name: Save scan result
+        run: echo "${{ steps.check.outputs.critical_found }}" > result.txt
+
+      - name: Upload result artifact
+        uses: actions/upload-artifact@v4
         with:
-          subject-path: 'target/*'
+          name: scan-result
+          path: result.txt
