@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build with Maven (optional)
-        run: mvn -B compile
+        run: mvn -B package
 
       - name: Run Snyk Open Source scan 
         uses: snyk/actions/maven@master
@@ -98,4 +98,4 @@ jobs:
         uses: actions/attest-build-provenance@v2
         id: attest
         with:
-          subject-path: 'target'
+          subject-path: 'target/*'
