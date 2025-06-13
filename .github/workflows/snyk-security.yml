@@ -31,8 +31,9 @@ jobs:
 
       - name: Install Snyk CLI
         run: |
-          curl -sL https://snyk.io/install | bash
-          echo "$HOME/.snyk" >> $GITHUB_PATH
+          curl https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          chmod +x ./snyk
+          mv ./snyk /usr/local/bin/ 
 
       - name: Auth with Snyk
         run: snyk auth "${{ secrets.SNYK_TOKEN }}"
