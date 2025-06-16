@@ -11,6 +11,7 @@ permissions:
   actions: read
   id-token: write
   contents: write 
+  attestations: write
 
 jobs:
   snyk_scan:
