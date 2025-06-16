@@ -7,11 +7,10 @@ on:
     branches: [develop]
 
 permissions:
-  contents: read
   security-events: write
   actions: read
   id-token: write
-  
+  contents: write 
 
 jobs:
   snyk_scan:
