@@ -26,8 +26,9 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Install Snyk CLI
         run: |
@@ -59,11 +60,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Save scan result
-        run: echo "${{ steps.check.outputs.critical_found }}" > result.txt
+      - name: Check if critical findings were found
+        id: gate
+        run: |
+          if [[ "$critical_found" == "true" ]]; then
+            echo "Critical issues found. Skipping attestation."
+            exit 1
+          fi
 
-      - name: Upload result artifact
+      - name: Build JAR
+        run: mvn clean package --no-transfer-progress
+    
+      - name: Find built artifact
+        id: locate-artifact
+        run: |
+          ARTIFACT=$(find target -type f -name "*.war" | head -n 1)
+          echo "artifact_path=$ARTIFACT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: scan-result
-          path: result.txt
+          name: app-jar
+          path: ${{ steps.locate-artifact.outputs.artifact_path }}
+
+      - name: Generate SLSA Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.locate-artifact.outputs.artifact_path }}
