@@ -43,11 +43,11 @@ jobs:
 
       - name: Run Snyk Code scan
         continue-on-error: true
-        run: snyk code test demo-poc/vulnapp --report --org="${{ secrets.SNYK_ORG }}" --sarif-file-output=snyk-results.sarif
+        run: snyk code test --project-name="demo-poc/vulnapp" --report --org="${{ secrets.SNYK_ORG }}" --sarif-file-output=snyk-results.sarif
 
       - name: Run Snyk Dependency scan
         continue-on-error: true
-        run: snyk test demo-poc/vulnapp --report --org="${{ secrets.SNYK_ORG }}" 
+        run: snyk test --project-name="demo-poc/vulnapp" --report --org="${{ secrets.SNYK_ORG }}" 
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
